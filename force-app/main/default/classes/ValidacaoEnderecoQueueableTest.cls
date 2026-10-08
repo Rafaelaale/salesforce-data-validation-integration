@@ -20,6 +20,16 @@ private class ValidacaoEnderecoQueueableTest {
         }
     }
 
+    private class ViaCepMockFalhaInesperada implements HttpCalloutMock {
+        public HttpResponse respond(HttpRequest req) {
+            HttpResponse res = new HttpResponse();
+            res.setStatusCode(200);
+            res.setHeader('Content-Type', 'application/json');
+            res.setBody('isto nao e um json valido');
+            return res;
+        }
+    }
+
     @isTest
     static void testValidacaoComSucesso() {
         Endereco_Validado__c registro = new Endereco_Validado__c(Cep__c = '01001000', Status_Validacao__c = 'Pendente');
@@ -51,5 +61,20 @@ private class ValidacaoEnderecoQueueableTest {
         Endereco_Validado__c atualizado = [SELECT Status_Validacao__c, Mensagem_Erro__c FROM Endereco_Validado__c WHERE Id = :registro.Id];
         System.assertEquals('Erro', atualizado.Status_Validacao__c);
         System.assertEquals('CEP não encontrado', atualizado.Mensagem_Erro__c);
+    }
+
+    @isTest
+    static void testRespostaInvalidaEhTratadaComoErro() {
+        Endereco_Validado__c registro = new Endereco_Validado__c(Cep__c = '01001000', Status_Validacao__c = 'Pendente');
+        insert registro;
+
+        Test.setMock(HttpCalloutMock.class, new ViaCepMockFalhaInesperada());
+
+        Test.startTest();
+        System.enqueueJob(new ValidacaoEnderecoQueueable('01001000', registro.Id));
+        Test.stopTest();
+
+        Endereco_Validado__c atualizado = [SELECT Status_Validacao__c FROM Endereco_Validado__c WHERE Id = :registro.Id];
+        System.assertEquals('Erro', atualizado.Status_Validacao__c);
     }
 }

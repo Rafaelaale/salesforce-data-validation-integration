@@ -8,6 +8,9 @@ public with sharing class ValidacaoEnderecoQueueable implements Queueable, Datab
     }
 
     public void execute(QueueableContext context) {
+        // garante que o registro saia de "Pendente" mesmo se algo falhar sem ser capturado abaixo
+        System.attachFinalizer(new ValidacaoEnderecoFinalizer(registroId));
+
         HttpRequest req = new HttpRequest();
         req.setEndpoint('callout:ViaCEP/' + cep + '/json/');
         req.setMethod('GET');
