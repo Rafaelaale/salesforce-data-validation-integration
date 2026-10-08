@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <deploymentStatus>Deployed</deploymentStatus>
+    <label>Endereço Validado</label>
+    <nameField>
+        <displayFormat>END-{00000}</displayFormat>
+        <label>Número da validação</label>
+        <type>AutoNumber</type>
+    </nameField>
+    <pluralLabel>Endereços Validados</pluralLabel>
+    <sharingModel>ReadWrite</sharingModel>
+</CustomObject>
